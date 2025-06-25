@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hear Your Future AI Agent, Live</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep-space: #02040A; 
+            --bg-interface: #080A14; 
+            --accent-cyan: #00E5FF;
+            --accent-purple: #B061FF;
+            --accent-gold: #FFD700;
+            --accent-orange: #FF6B35;
+            --accent-green: #00FF88;
+            --accent-red: #FF4444;
+            --text-primary: #D0D8FF;
+            --text-secondary: #70A1FF;
+            --border-subtle: rgba(100, 120, 180, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-deep-space) 0%, #0A0E1A 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Compact Header */
+        .header {
+            padding: 2rem 0 1.5rem;
+            text-align: center;
+        }
+
+        .hero-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Compact Input Section */
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .input-label {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .input-field, .select-field {
+            background: rgba(26, 27, 38, 0.9);
+            border: 1px solid var(--border-subtle);
+            border-radius: 0.5rem;
+            padding: 0.8rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-field:focus, .select-field:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.2);
+        }
+
+        .input-field:disabled, .select-field:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .select-field option {
+            background: var(--bg-interface);
+            color: var(--text-primary);
+        }
+
+        /* Customer Name Field Styling */
+        .customer-name-group {
+            grid-column: 1 / -1;
+            max-width: 350px;
+            margin: 0 auto;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Enhanced Microphone Section */
+        .mic-section {
+            display: flex;
+            justify-content: center;
+            gap: 6rem;
+            margin-bottom: 1rem;
+        }
+
+        .mic-card {
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            padding: 2rem 1.5rem;
+            border-radius: 1.5rem;
+            border: 2px solid transparent;
+            position: relative;
+            background: rgba(26, 27, 38, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .mic-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            background: rgba(26, 27, 38, 0.5);
+        }
+
+        .mic-card.professional:hover {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 15px 40px rgba(0, 229, 255, 0.3);
+        }
+
+        .mic-card.natural:hover {
+            border-color: var(--accent-gold);
+            box-shadow: 0 15px 40px rgba(255, 215, 0, 0.4);
+        }
+
+        .mic-card.active {
+            transform: translateY(-6px) scale(1.05);
+            background: rgba(26, 27, 38, 0.7);
+        }
+
+        .mic-card.active.professional {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 20px 50px rgba(0, 229, 255, 0.4);
+        }
+
+        .mic-card.active.natural {
+            border-color: var(--accent-gold);
+            box-shadow: 0 20px 50px rgba(255, 215, 0, 0.5);
+        }
+
+        .mic-card.connected {
+            border-color: var(--accent-green);
+            box-shadow: 0 20px 50px rgba(0, 255, 136, 0.4);
+            animation: connectedPulse 2s infinite;
+        }
+
+        .mic-card.connecting {
+            border-color: var(--accent-orange);
+            box-shadow: 0 20px 50px rgba(255, 107, 53, 0.4);
+            animation: connectingPulse 1s infinite;
+        }
+
+        @keyframes connectedPulse {
+            0%, 100% { box-shadow: 0 20px 50px rgba(0, 255, 136, 0.4); }
+            50% { box-shadow: 0 25px 60px rgba(0, 255, 136, 0.6); }
+        }
+
+        @keyframes connectingPulse {
+            0%, 100% { box-shadow: 0 20px 50px rgba(255, 107, 53, 0.4); }
+            50% { box-shadow: 0 25px 60px rgba(255, 107, 53, 0.6); }
+        }
+
+        .mic-card.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+            animation: none !important;
+        }
+
+        .mic-button {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s ease;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            position: relative;
+        }
+
+        .mic-button.professional {
+            background: linear-gradient(135deg, var(--accent-cyan), #0891B2);
+        }
+
+        .mic-button.natural {
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-orange));
+            box-shadow: 0 8px 30px rgba(255, 215, 0, 0.3);
+        }
+
+        .mic-button.connected {
+            background: linear-gradient(135deg, var(--accent-green), #00CC6A);
+            box-shadow: 0 8px 30px rgba(0, 255, 136, 0.4);
+        }
+
+        .mic-button.connecting {
+            background: linear-gradient(135deg, var(--accent-orange), #FF8C42);
+            box-shadow: 0 8px 30px rgba(255, 107, 53, 0.4);
+        }
+
+        .mic-button:hover {
+            transform: scale(1.1);
+        }
+
+        .mic-button.professional:hover {
+            box-shadow: 0 12px 40px rgba(0, 229, 255, 0.4);
+        }
+
+        .mic-button.natural:hover {
+            box-shadow: 0 12px 40px rgba(255, 215, 0, 0.5);
+        }
+
+        .mic-button.active {
+            animation: micPulse 1.5s infinite;
+        }
+
+        @keyframes micPulse {
+            0%, 100% { transform: scale(1.1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .mic-icon {
+            width: 50px;
+            height: 50px;
+            color: white;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .mic-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .mic-title.professional {
+            color: var(--accent-cyan);
+        }
+
+        .mic-title.natural {
+            color: var(--accent-gold);
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .mic-title.connected {
+            color: var(--accent-green);
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
+        .mic-title.connecting {
+            color: var(--accent-orange);
+            text-shadow: 0 0 10px rgba(255, 107, 53, 0.3);
+        }
+
+        .mic-subtitle {
+            font-size: 1rem;
+            color: white;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .call-prompt {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.8rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .call-prompt.professional {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            background: rgba(0, 229, 255, 0.1);
+        }
+
+        .call-prompt.natural {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .mic-features {
+            display: flex;
+            gap: 0.6rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .feature-tag {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 1rem;
+            padding: 0.3rem 0.8rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .feature-tag.professional {
+            border-color: rgba(0, 229, 255, 0.2);
+            color: rgba(0, 229, 255, 0.7);
+            background: rgba(0, 229, 255, 0.05);
+        }
+
+        .feature-tag.natural {
+            border-color: rgba(255, 215, 0, 0.2);
+            color: rgba(255, 215, 0, 0.7);
+            background: rgba(255, 215, 0, 0.05);
+        }
+
+        .feature-tag.connected {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+            background: rgba(0, 255, 136, 0.15);
+        }
+
+        .feature-tag.connecting {
+            border-color: var(--accent-orange);
+            color: var(--accent-orange);
+            background: rgba(255, 107, 53, 0.15);
+        }
+
+        /* Connection Status Indicator */
+        .connection-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .connection-status.connected {
+            color: var(--accent-green);
+        }
+
+        .connection-status.connecting {
+            color: var(--accent-orange);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: statusBlink 1.5s infinite;
+        }
+
+        .status-dot.connected {
+            background: var(--accent-green);
+        }
+
+        .status-dot.connecting {
+            background: var(--accent-orange);
+        }
+
+        @keyframes statusBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Disclaimer */
+        .disclaimer {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 0 2rem;
+        }
+
+        .disclaimer-text {
+            font-size: 0.8rem;
+            color: rgba(208, 216, 255, 0.6);
+            line-height: 1.4;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Compact Status */
+        .status-section {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .status-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent-cyan);
+            letter-spacing: 0.5px;
+        }
+
+        /* Updated CTA Section with new color palette */
+        .cta-section {
+            background: linear-gradient(135deg, rgba(16, 18, 30, 0.8), rgba(26, 27, 38, 0.6));
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+            margin: 2rem 0;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(0, 229, 255, 0.1);
+        }
+
+        .cta-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .cta-description {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            max-width: 500px;
+            margin: 0 auto 1.5rem;
+            line-height: 1.5;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 0.8rem 1.8rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 229, 255, 0.4);
+        }
+
+        /* Footer Link */
+        .footer-link {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1rem;
+        }
+
+        .footer-link a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+            border-bottom: 1px solid transparent;
+        }
+
+        .footer-link a:hover {
+            color: var(--accent-cyan);
+            border-bottom-color: var(--accent-cyan);
+        }
+
+        /* Error Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: var(--bg-interface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .modal-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #EF4444;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+        }
+
+        .modal-text {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .modal-button {
+            width: 100%;
+            background: #EF4444;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .modal-button:hover {
+            background: #DC2626;
+        }
+
+        /* Debug Console */
+        .debug-console {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 1rem;
+            border-top: 1px solid var(--accent-cyan);
+            z-index: 999;
+        }
+
+        .debug-console.hidden {
+            display: none;
+        }
+
+        .debug-entry {
+            margin-bottom: 0.25rem;
+            word-break: break-all;
+        }
+
+        .debug-timestamp {
+            color: #888;
+            margin-right: 0.5rem;
+        }
+
+        .debug-level-info {
+            color: #00ff00;
+        }
+
+        .debug-level-warn {
+            color: #ffff00;
+        }
+
+        .debug-level-error {
+            color: #ff0000;
+        }
+
+        .debug-toggle {
+            position: fixed;
+            bottom: 210px;
+            right: 20px;
+            background: var(--accent-cyan);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+
+            .mic-section {
+                flex-direction: column;
+                gap: 2rem;
+                align-items: center;
+            }
+
+            .input-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .customer-name-group {
+                grid-column: 1;
+            }
+
+            .mic-button {
+                width: 100px;
+                height: 100px;
+            }
+
+            .mic-icon {
+                width: 40px;
+                height: 40px;
+            }
+
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .debug-console {
+                max-height: 150px;
+                font-size: 0.7rem;
+                padding: 0.5rem;
+            }
+
+            .debug-toggle {
+                bottom: 160px;
+                right: 10px;
+                padding: 0.4rem 0.8rem;
+                font-size: 0.7rem;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Debug Console -->
+    <div id="debugConsole" class="debug-console hidden">
+        <div id="debugEntries"></div>
+    </div>
+    <button id="debugToggle" class="debug-toggle">Debug</button>
+
+    <!-- Error Modal -->
+    <div id="errorMessageModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-title">Connection Error</div>
+            <p id="errorMessageText" class="modal-text"></p>
+            <button id="closeErrorModalButton" class="modal-button">
+                Acknowledge
+            </button>
+        </div>
+    </div>
+
+    <!-- Header Section -->
+    <header class="header">
+        <div class="container">
+            <h1 class="hero-title">Hear Your Future AI Agent, Live</h1>
+
+            <!-- Input Section -->
+            <div class="input-grid">
+                <div class="input-group">
+                    <label for="companyNameInput" class="input-label">Company Name</label>
+                    <input 
+                        type="text" 
+                        id="companyNameInput" 
+                        class="input-field" 
+                        placeholder="Your Business Name"
+                    />
+                </div>
+                <div class="input-group">
+                    <label for="serviceSelector" class="input-label">Service Demo</label>
+                    <select id="serviceSelector" class="select-field">
+                        <option value="appointment-setting">Appointment Setting</option>
+                        <option value="inbound-lead-capture">Inbound Lead Capture</option>
+                        <option value="customer-service">Customer Service</option>
+                        <option value="outbound-sales">Outbound Sales</option>
+                        <option value="technical-support">Technical Support</option>
+                        <option value="after-hours">After Hours</option>
+                        <option value="healthcare">Healthcare</option>
+                    </select>
+                </div>
+                <!-- Customer Name Field (hidden by default) -->
+                <div class="input-group customer-name-group hidden" id="customerNameGroup">
+                    <label for="customerNameInput" class="input-label">Customer Name</label>
+                    <input 
+                        type="text" 
+                        id="customerNameInput" 
+                        class="input-field" 
+                        placeholder="Enter customer's name"
+                    />
+                </div>
+            </div>
+
+            <!-- Microphone Selection -->
+            <div class="mic-section">
+                <!-- Standard AI -->
+                <div id="professionalCard" class="mic-card professional">
+                    <button class="mic-button professional">
+                        <svg class="mic-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z"/>
+                        </svg>
+                    </button>
+                    <h3 class="mic-title professional">Standard</h3>
+                    <p class="mic-subtitle">Clear & Efficient</p>
+                    <div class="call-prompt professional">Press to Begin Call</div>
+                    <div class="mic-features">
+                        <span class="feature-tag professional">Direct</span>
+                        <span class="feature-tag professional">Structured</span>
+                        <span class="feature-tag professional">Professional</span>
+                    </div>
+                    <div id="professionalStatus" class="connection-status hidden">
+                        <div class="status-dot"></div>
+                        <span id="professionalStatusText">Ready</span>
+                    </div>
+                </div>
+
+                <!-- Premium AI -->
+                <div id="naturalCard" class="mic-card natural">
+                    <button class="mic-button natural">
+                        <svg class="mic-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z"/>
+                        </svg>
+                    </button>
+                    <h3 class="mic-title natural">Premium</h3>
+                    <p class="mic-subtitle">Conversational & Adaptive</p>
+                    <div class="call-prompt natural">Press to Begin Call</div>
+                    <div class="mic-features">
+                        <span class="feature-tag natural">Warm</span>
+                        <span class="feature-tag natural">Adaptive</span>
+                        <span class="feature-tag natural">Intuitive</span>
+                    </div>
+                    <div id="naturalStatus" class="connection-status hidden">
+                        <div class="status-dot"></div>
+                        <span id="naturalStatusText">Ready</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Disclaimer -->
+            <div class="disclaimer">
+                <p class="disclaimer-text">
+                    This is a demonstration for evaluation purposes. Please note that browser audio quality may differ from the final phone implementation. Any audio imperfections you experience during this demo will not be present in the production system, which is optimized for telephone networks and provides crystal-clear voice quality.
+                </p>
+            </div>
+
+            <!-- Status -->
+            <div class="status-section">
+                <div id="statusBar" class="status-text">Click to Start</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Call-to-Action Section -->
+        <section class="cta-section">
+            <h2 class="cta-title">Ready to Transform Your Business?</h2>
+            <p class="cta-description">
+                Experience the power of AI-driven conversations. Get your custom AI agent built by experts 
+                who understand your unique business needs and customer interactions.
+            </p>
+            <a href="https://www.fiverr.com/your-gig-url" class="cta-button" target="_blank" rel="noopener noreferrer">
+                Build My Custom Agent on Fiverr
+            </a>
+        </section>
+
+        <!-- Footer Link -->
+        <div class="footer-link">
+            <a href="/src/alter.html">View AI System Instructions Configuration</a>
+        </div>
+    </main>
+
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>

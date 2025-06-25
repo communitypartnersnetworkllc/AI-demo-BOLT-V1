@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agent System Instructions - Configuration</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep-space: #02040A; 
+            --bg-interface: #080A14; 
+            --accent-cyan: #00E5FF;
+            --accent-purple: #B061FF;
+            --accent-gold: #FFD700;
+            --text-primary: #D0D8FF;
+            --text-secondary: #70A1FF;
+            --border-subtle: rgba(100, 120, 180, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-deep-space) 0%, #0A0E1A 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .company-display {
+            background: rgba(26, 27, 38, 0.6);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1rem;
+            padding: 1rem 2rem;
+            display: inline-block;
+            margin-bottom: 2rem;
+        }
+
+        .company-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .company-name {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .service-card {
+            background: rgba(26, 27, 38, 0.8);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1rem;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .service-card:hover {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 8px 30px rgba(0, 229, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .service-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .instruction-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .instruction-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .instruction-text {
+            background: rgba(16, 18, 30, 0.8);
+            border: 1px solid rgba(100, 120, 180, 0.1);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            line-height: 1.6;
+            white-space: pre-wrap;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            min-height: 150px;
+            width: 100%;
+            resize: vertical;
+        }
+
+        .context-text {
+            background: rgba(176, 97, 255, 0.1);
+            border: 1px solid rgba(176, 97, 255, 0.3);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            line-height: 1.6;
+            font-style: italic;
+            width: 100%;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 0.8rem 1.5rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3);
+            margin-bottom: 2rem;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 229, 255, 0.4);
+        }
+
+        .placeholder-text {
+            color: var(--accent-gold);
+            font-weight: 600;
+            background: rgba(255, 215, 0, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.3rem;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        /* Configuration Section */
+        .config-section {
+            background: rgba(26, 27, 38, 0.8);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .config-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .config-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .config-label {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .config-input, .config-select, .config-textarea {
+            background: rgba(16, 18, 30, 0.8);
+            border: 1px solid var(--border-subtle);
+            border-radius: 0.5rem;
+            padding: 0.8rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: border-color 0.3s ease;
+            font-family: 'Inter', sans-serif;
+            width: 100%;
+        }
+
+        .config-textarea {
+            resize: vertical;
+            min-height: 150px;
+            font-size: 0.9rem;
+        }
+
+        .config-input:focus, .config-select:focus, .config-textarea:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.2);
+        }
+
+        .config-select option {
+            background: var(--bg-interface);
+            color: var(--text-primary);
+        }
+
+        .checkbox-group {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 1.2rem;
+            height: 1.2rem;
+            accent-color: var(--accent-cyan);
+        }
+
+        .checkbox-item label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .save-button {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3);
+            cursor: pointer;
+            display: block;
+            margin: 2rem auto 0;
+        }
+
+        .save-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 229, 255, 0.4);
+        }
+
+        .reset-button {
+            background: #EF4444;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+            cursor: pointer;
+            display: block;
+            margin: 1rem auto 0;
+        }
+
+        .reset-button:hover {
+            background: #DC2626;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .service-card {
+                padding: 1.5rem;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .config-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .checkbox-group {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/" class="back-button">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m12 19-7-7 7-7"/>
+                    <path d="M19 12H5"/>
+                </svg>
+                Back to Demo
+            </a>
+            
+            <h1 class="page-title">AI Agent System Instructions</h1>
+            <p class="page-subtitle">
+                Configure how your AI agents will behave for each service type
+            </p>
+            
+            <div class="company-display">
+                <div class="company-label">Configured for Company:</div>
+                <div id="companyNameDisplay" class="company-name">Your Business Name</div>
+            </div>
+        </div>
+
+        <!-- Global Configuration Section -->
+        <div class="config-section">
+            <h2 class="config-title">Global AI Configuration</h2>
+            
+            <div class="config-grid">
+                <div class="config-group">
+                    <label for="globalVoiceSelector" class="config-label">Voice Selection</label>
+                    <select id="globalVoiceSelector" class="config-select">
+                        <option value="Puck">Puck</option>
+                        <option value="Charon">Charon</option>
+                        <option value="Kore">Kore</option>
+                        <option value="Fenrir" selected>Fenrir</option>
+                        <option value="Aoede">Aoede</option>
+                        <option value="Leda">Leda</option>
+                        <option value="Orus">Orus</option>
+                        <option value="Zephyr">Zephyr</option>
+                    </select>
+                </div>
+                <div class="config-group">
+                    <label for="globalModelSelector" class="config-label">AI Model</label>
+                    <select id="globalModelSelector" class="config-select">
+                        <option value="standard">Standard (Fast & Efficient)</option>
+                        <option value="premium">Premium (Conversational & Advanced)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="config-group">
+                <label for="globalSystemInstructionInput" class="config-label">Global System Instructions</label>
+                <textarea 
+                    id="globalSystemInstructionInput" 
+                    class="config-textarea" 
+                    placeholder="Enter global instructions that apply to all AI agents (optional - will be combined with service-specific instructions)"
+                ></textarea>
+            </div>
+
+            <div class="checkbox-group">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="globalAffectiveDialogToggle" />
+                    <label for="globalAffectiveDialogToggle">Affective Dialog (Premium Only)</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="globalProactiveAudioToggle" />
+                    <label for="globalProactiveAudioToggle">Proactive Audio (Premium Only)</label>
+                </div>
+            </div>
+
+            <button id="saveGlobalConfigButton" class="save-button">Save Global Configuration</button>
+            <button id="resetConfigButton" class="reset-button">Reset to Defaults</button>
+        </div>
+
+        <div class="services-grid" id="servicesGrid">
+            <!-- Service cards will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <script type="module">
+        import { serviceDemoConfig } from './config.js';
+
+        // Get company name from URL parameters or localStorage
+        function getCompanyName() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const companyFromUrl = urlParams.get('company');
+            const companyFromStorage = localStorage.getItem('demoCompanyName');
+            
+            return companyFromUrl || companyFromStorage || 'Your Business Name';
+        }
+
+        // Replace placeholders with actual company name
+        function replaceCompanyPlaceholders(text, companyName) {
+            return text.replace(/\[COMPANY_NAME\]/g, companyName);
+        }
+
+        // Simplified function to load configurations
+        function loadSavedConfigurations() {
+            const savedConfig = localStorage.getItem('aiAgentConfig');
+            if (savedConfig) {
+                try {
+                    const config = JSON.parse(savedConfig);
+                    
+                    // Load global settings
+                    if (config.globalVoice) {
+                        document.getElementById('globalVoiceSelector').value = config.globalVoice;
+                    }
+                    if (config.globalModel) {
+                        document.getElementById('globalModelSelector').value = config.globalModel;
+                    }
+                    if (config.globalSystemInstruction) {
+                        document.getElementById('globalSystemInstructionInput').value = config.globalSystemInstruction;
+                    }
+                    if (config.globalAffectiveDialog !== undefined) {
+                        document.getElementById('globalAffectiveDialogToggle').checked = config.globalAffectiveDialog;
+                    }
+                    if (config.globalProactiveAudio !== undefined) {
+                        document.getElementById('globalProactiveAudioToggle').checked = config.globalProactiveAudio;
+                    }
+                    
+                    // Load service-specific settings
+                    for (const [serviceKey, serviceConfig] of Object.entries(config.services || {})) {
+                        const textarea = document.getElementById(`${serviceKey}-instruction`);
+                        const contextInput = document.getElementById(`${serviceKey}-context`);
+                        
+                        if (textarea && serviceConfig.systemInstruction) {
+                            textarea.value = serviceConfig.systemInstruction;
+                        }
+                        if (contextInput && serviceConfig.context) {
+                            contextInput.value = serviceConfig.context;
+                        }
+                    }
+                    
+                } catch (error) {
+                    console.error('Error loading saved configuration:', error);
+                }
+            } else {
+                // No saved config, populate with defaults
+                populateWithDefaults();
+            }
+        }
+
+        // Populate fields with default values
+        function populateWithDefaults() {
+            const companyName = getCompanyName();
+            
+            for (const [serviceKey, config] of Object.entries(serviceDemoConfig)) {
+                const textarea = document.getElementById(`${serviceKey}-instruction`);
+                const contextInput = document.getElementById(`${serviceKey}-context`);
+                
+                if (textarea) {
+                    textarea.value = replaceCompanyPlaceholders(config.systemInstruction, companyName);
+                }
+                if (contextInput) {
+                    contextInput.value = replaceCompanyPlaceholders(config.context, companyName);
+                }
+            }
+        }
+
+        // Save configurations
+        function saveConfigurations() {
+            const config = {
+                globalVoice: document.getElementById('globalVoiceSelector').value,
+                globalModel: document.getElementById('globalModelSelector').value,
+                globalSystemInstruction: document.getElementById('globalSystemInstructionInput').value,
+                globalAffectiveDialog: document.getElementById('globalAffectiveDialogToggle').checked,
+                globalProactiveAudio: document.getElementById('globalProactiveAudioToggle').checked,
+                services: {}
+            };
+            
+            // Save service-specific configurations
+            for (const serviceKey of Object.keys(serviceDemoConfig)) {
+                const textarea = document.getElementById(`${serviceKey}-instruction`);
+                const contextInput = document.getElementById(`${serviceKey}-context`);
+                
+                if (textarea || contextInput) {
+                    config.services[serviceKey] = {
+                        systemInstruction: textarea ? textarea.value : '',
+                        context: contextInput ? contextInput.value : ''
+                    };
+                }
+            }
+            
+            localStorage.setItem('aiAgentConfig', JSON.stringify(config));
+            
+            // Show success message
+            const button = document.getElementById('saveGlobalConfigButton');
+            const originalText = button.textContent;
+            button.textContent = 'Saved!';
+            button.style.background = 'linear-gradient(135deg, #00FF88, #00CC6A)';
+            
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.style.background = 'linear-gradient(135deg, var(--accent-cyan), var(--accent-purple))';
+            }, 2000);
+        }
+
+        // Reset configurations to defaults
+        function resetConfigurations() {
+            if (confirm('Are you sure you want to reset all configurations to defaults? This cannot be undone.')) {
+                localStorage.removeItem('aiAgentConfig');
+                location.reload();
+            }
+        }
+
+        // Create service card HTML
+        function createServiceCard(serviceKey, config, companyName) {
+            const processedInstruction = replaceCompanyPlaceholders(config.systemInstruction, companyName);
+            const processedContext = replaceCompanyPlaceholders(config.context, companyName);
+            
+            return `
+                <div class="service-card">
+                    <h2 class="service-title">${config.title}</h2>
+                    
+                    <div class="instruction-section">
+                        <div class="instruction-label">System Instruction</div>
+                        <textarea 
+                            id="${serviceKey}-instruction" 
+                            class="instruction-text" 
+                            placeholder="Enter custom system instruction for ${config.title}..."
+                        >${processedInstruction}</textarea>
+                    </div>
+                    
+                    <div class="instruction-section">
+                        <div class="instruction-label">Opening Context</div>
+                        <input 
+                            type="text" 
+                            id="${serviceKey}-context" 
+                            class="context-text" 
+                            placeholder="Enter opening message..."
+                            value="${processedContext}"
+                        />
+                    </div>
+                </div>
+            `;
+        }
+
+        // Update company name display
+        function updateCompanyNameDisplay() {
+            const companyName = getCompanyName();
+            document.getElementById('companyNameDisplay').textContent = companyName;
+        }
+
+        // Initialize the page
+        function initializePage() {
+            const companyName = getCompanyName();
+            
+            // Update company name display
+            updateCompanyNameDisplay();
+            
+            // Generate service cards
+            const servicesGrid = document.getElementById('servicesGrid');
+            let cardsHTML = '';
+            
+            for (const [serviceKey, config] of Object.entries(serviceDemoConfig)) {
+                cardsHTML += createServiceCard(serviceKey, config, companyName);
+            }
+            
+            servicesGrid.innerHTML = cardsHTML;
+            
+            // Load saved configurations or populate with defaults
+            loadSavedConfigurations();
+            
+            // Add event listeners
+            document.getElementById('saveGlobalConfigButton').addEventListener('click', saveConfigurations);
+            document.getElementById('resetConfigButton').addEventListener('click', resetConfigurations);
+            
+            // Auto-save on changes
+            const inputs = document.querySelectorAll('input, textarea, select');
+            inputs.forEach(input => {
+                input.addEventListener('change', saveConfigurations);
+                if (input.type === 'text' || input.tagName === 'TEXTAREA') {
+                    input.addEventListener('input', debounce(saveConfigurations, 1000));
+                }
+            });
+
+            // Listen for company name changes from localStorage
+            setInterval(updateCompanyNameDisplay, 1000);
+        }
+
+        // Debounce function for auto-save
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initializePage);
+    </script>
+</body>
+</html>
