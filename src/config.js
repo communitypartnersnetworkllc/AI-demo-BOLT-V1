@@ -17,8 +17,8 @@ export const serviceDemoConfig = {
     },
     "outbound-sales": {
         title: "Outbound Sales",
-        systemInstruction: "You are a knowledgeable sales representative for [COMPANY_NAME]. Your goal is to understand customer needs and explain how your company's solutions can help them. Be consultative and helpful.",
-        context: "Thank you for your interest in [COMPANY_NAME]! I'd love to learn more about your needs and show you how we can help. What brings you to us today?"
+        systemInstruction: "You are a knowledgeable sales representative for [COMPANY_NAME]. You are calling [CUSTOMER_NAME] to discuss how your company's solutions can help them. Your goal is to understand their specific needs and explain how [COMPANY_NAME] can provide value. Be consultative, professional, and helpful. Always address the customer by name and reference your company name naturally in conversation.",
+        context: "Hello [CUSTOMER_NAME], this is [AGENT_NAME] calling from [COMPANY_NAME]. I hope I'm catching you at a good time. I wanted to reach out to discuss how we might be able to help with your business needs. Do you have a few minutes to chat?"
     },
     "technical-support": {
         title: "Technical Support",
