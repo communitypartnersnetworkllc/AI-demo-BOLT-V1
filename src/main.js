@@ -1,6 +1,15 @@
 import { GoogleGenAI, Modality } from 'https://esm.run/@google/genai';
 import { serviceDemoConfig } from './config.js';
 
+// Get company name from URL parameters or localStorage
+function getCompanyName() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const companyFromUrl = urlParams.get('company');
+    const companyFromStorage = localStorage.getItem('demoCompanyName');
+    
+    return companyFromUrl || companyFromStorage || 'Your Business Name';
+}
+
 // API Configuration with cycling for premium
 const API_KEYS = [
     "AIzaSyAwiK63TterKv9jZULyZO8sjCZadNg5Blc",
@@ -96,6 +105,29 @@ function loadSavedConfiguration() {
     return null;
 }
 
+// Get current real-time configuration from modal fields
+function getCurrentConfiguration() {
+    const companyName = companyNameInput.value.trim() || "Your Company";
+    
+    // Get configuration directly from modal elements (real-time)
+    const voiceSelector = document.getElementById('voiceSelector');
+    const standardModelSelector = document.getElementById('standardModelSelector');
+    const premiumModelSelector = document.getElementById('premiumModelSelector');
+    const affectiveDialogToggle = document.getElementById('affectiveDialogToggle');
+    const proactiveAudioToggle = document.getElementById('proactiveAudioToggle');
+    const currentConfig = {
+        companyName: companyName,
+        standardModel: standardModelSelector?.value || "gemini-live-2.5-flash-preview",
+        premiumModel: premiumModelSelector?.value || "gemini-2.0-flash-live-001",
+        globalVoice: voiceSelector?.value || 'Fenrir',
+        globalAffectiveDialog: affectiveDialogToggle?.checked || false,
+        globalProactiveAudio: proactiveAudioToggle?.checked || false
+    };
+    
+    debugLog('info', 'Real-time configuration captured', currentConfig);
+    return currentConfig;
+}
+
 // DOM Elements
 const errorMessageModal = document.getElementById('errorMessageModal');
 const errorMessageText = document.getElementById('errorMessageText');
@@ -112,6 +144,196 @@ const professionalStatusText = document.getElementById('professionalStatusText')
 const naturalStatusText = document.getElementById('naturalStatusText');
 const statusBar = document.getElementById('statusBar');
 const debugToggle = document.getElementById('debugToggle');
+
+// Configuration Modal Elements
+const settingsButton = document.getElementById('settingsButton');
+const configModal = document.getElementById('configModal');
+const closeConfigModal = document.getElementById('closeConfigModal');
+const saveConfigButton = document.getElementById('saveConfigButton');
+const resetConfigButton = document.getElementById('resetConfigButton');
+
+// Configuration Modal Functions
+function openConfigModal() {
+    configModal.classList.remove('hidden');
+    loadConfigurationToModal();
+}
+
+function closeConfigModalHandler() {
+    configModal.classList.add('hidden');
+}
+
+function loadConfigurationToModal() {
+    // First populate service instructions
+    populateServiceInstructions();
+    
+    const savedConfig = loadSavedConfiguration();
+    
+    if (savedConfig) {
+        // Load saved values into modal
+        const voiceSelector = document.getElementById('voiceSelector');
+        const standardModelSelector = document.getElementById('standardModelSelector');
+        const premiumModelSelector = document.getElementById('premiumModelSelector');
+        const affectiveDialogToggle = document.getElementById('affectiveDialogToggle');
+        const proactiveAudioToggle = document.getElementById('proactiveAudioToggle');
+        const companyNameInput = document.getElementById('companyName');
+        const agentNameInput = document.getElementById('agentName');
+        const customerNameInput = document.getElementById('customerName');
+        if (voiceSelector && savedConfig.globalVoice) {
+            voiceSelector.value = savedConfig.globalVoice;
+        }
+        if (standardModelSelector && savedConfig.standardModel) {
+            standardModelSelector.value = savedConfig.standardModel;
+        }
+        if (premiumModelSelector && savedConfig.premiumModel) {
+            premiumModelSelector.value = savedConfig.premiumModel;
+        }
+        if (affectiveDialogToggle) {
+            affectiveDialogToggle.checked = savedConfig.globalAffectiveDialog || false;
+        }
+        if (proactiveAudioToggle) {
+            proactiveAudioToggle.checked = savedConfig.globalProactiveAudio || false;
+        }
+        if (companyNameInput) {
+            companyNameInput.value = savedConfig.companyName || 'Community Partners Network LLC';
+        }
+        if (agentNameInput) {
+            agentNameInput.value = savedConfig.agentName || 'Sarah';
+        }
+        if (customerNameInput) {
+            customerNameInput.value = savedConfig.customerName || '';
+        }
+        
+        // Load service-specific instructions
+        loadServiceInstructions(savedConfig);
+    }
+}
+
+function populateServiceInstructions() {
+    const container = document.getElementById('serviceInstructionsContainer');
+    if (!container) return;
+    
+    const savedConfig = loadSavedConfiguration();
+    const companyName = savedConfig?.companyName || getCompanyName();
+    const agentName = savedConfig?.agentName || 'Sarah';
+    const customerName = savedConfig?.customerName || '';
+    
+    let html = '';
+    
+    for (const [serviceKey, config] of Object.entries(serviceDemoConfig)) {
+        const processedInstruction = config.systemInstruction
+            .replace(/\[COMPANY_NAME\]/g, companyName)
+            .replace(/\[AGENT_NAME\]/g, agentName)
+            .replace(/\[CUSTOMER_NAME\]/g, customerName);
+            
+        html += `
+            <div class="service-instruction-card">
+                <div class="service-instruction-title">${config.title}</div>
+                <textarea 
+                    id="${serviceKey}-instruction" 
+                    class="service-instruction-textarea"
+                    placeholder="System instruction for ${config.title}..."
+                >${processedInstruction}</textarea>
+            </div>
+        `;
+    }
+    
+    container.innerHTML = html;
+}
+
+function loadServiceInstructions(savedConfig) {
+    if (!savedConfig.services) return;
+    
+    const companyName = savedConfig?.companyName || getCompanyName();
+    const agentName = savedConfig?.agentName || 'Sarah';
+    const customerName = savedConfig?.customerName || '';
+    
+    for (const [serviceKey, serviceConfig] of Object.entries(savedConfig.services)) {
+        const textarea = document.getElementById(`${serviceKey}-instruction`);
+        if (textarea && serviceConfig.systemInstruction) {
+            textarea.value = serviceConfig.systemInstruction
+                .replace(/\[COMPANY_NAME\]/g, companyName)
+                .replace(/\[AGENT_NAME\]/g, agentName)
+                .replace(/\[CUSTOMER_NAME\]/g, customerName);
+        }
+    }
+}
+
+function saveConfiguration() {
+    const voiceSelector = document.getElementById('voiceSelector');
+    const standardModelSelector = document.getElementById('standardModelSelector');
+    const premiumModelSelector = document.getElementById('premiumModelSelector');
+    const affectiveDialogToggle = document.getElementById('affectiveDialogToggle');
+    const proactiveAudioToggle = document.getElementById('proactiveAudioToggle');
+    const companyNameInput = document.getElementById('companyName');
+    const agentNameInput = document.getElementById('agentName');
+    const customerNameInput = document.getElementById('customerName');
+    
+    const config = {
+        globalVoice: voiceSelector?.value || 'Fenrir',
+        standardModel: standardModelSelector?.value || "gemini-live-2.5-flash-preview",
+        premiumModel: premiumModelSelector?.value || "gemini-2.0-flash-live-001",
+        globalAffectiveDialog: affectiveDialogToggle?.checked || false,
+        globalProactiveAudio: proactiveAudioToggle?.checked || false,
+        companyName: companyNameInput?.value || 'Community Partners Network LLC',
+        agentName: agentNameInput?.value || 'Sarah',
+        customerName: customerNameInput?.value || '',
+        services: {}
+    };
+    
+    // Save service-specific instructions
+    for (const serviceKey of Object.keys(serviceDemoConfig)) {
+        const textarea = document.getElementById(`${serviceKey}-instruction`);
+        if (textarea) {
+            let instruction = textarea.value;
+            // Replace actual values with placeholders for storage
+            instruction = instruction
+                .replace(new RegExp(config.companyName, 'g'), '[COMPANY_NAME]')
+                .replace(new RegExp(config.agentName, 'g'), '[AGENT_NAME]')
+                .replace(new RegExp(config.customerName, 'g'), '[CUSTOMER_NAME]');
+            
+            config.services[serviceKey] = {
+                systemInstruction: instruction
+            };
+        }
+    }
+    
+    localStorage.setItem('aiAgentConfig', JSON.stringify(config));
+    
+    // Show success feedback
+    const originalText = saveConfigButton.textContent;
+    saveConfigButton.textContent = 'Saved!';
+    saveConfigButton.style.background = 'linear-gradient(135deg, #00FF88, #00CC6A)';
+    
+    setTimeout(() => {
+        saveConfigButton.textContent = originalText;
+        saveConfigButton.style.background = 'linear-gradient(135deg, var(--accent-cyan), var(--accent-purple))';
+    }, 2000);
+    
+    debugLog('info', 'Configuration saved', config);
+}
+
+function resetConfiguration() {
+    if (confirm('Are you sure you want to reset all configurations to defaults? This cannot be undone.')) {
+        localStorage.removeItem('aiAgentConfig');
+        
+        // Reset modal to defaults
+        const voiceSelector = document.getElementById('voiceSelector');
+        const standardModelSelector = document.getElementById('standardModelSelector');
+        const premiumModelSelector = document.getElementById('premiumModelSelector');
+        const affectiveDialogToggle = document.getElementById('affectiveDialogToggle');
+        const proactiveAudioToggle = document.getElementById('proactiveAudioToggle');
+        if (voiceSelector) voiceSelector.value = 'Fenrir';
+        if (standardModelSelector) standardModelSelector.value = "gemini-live-2.5-flash-preview";
+        if (premiumModelSelector) premiumModelSelector.value = "gemini-2.0-flash-live-001";
+        if (affectiveDialogToggle) affectiveDialogToggle.checked = false;
+        if (proactiveAudioToggle) proactiveAudioToggle.checked = false;
+        
+        // Reset service-specific instructions to defaults
+        populateServiceInstructions();
+        
+        debugLog('info', 'Configuration reset to defaults');
+    }
+}
 
 // Audio System Variables
 let audioContext, micStream, micSourceNode, micWorkletNode, playbackWorkletNode;
@@ -677,14 +899,14 @@ async function startRecording(aiType) {
     const serviceType = serviceSelector.value;
     const serviceConfig = serviceDemoConfig[serviceType];
     
-    // Load saved configuration
-    const savedConfig = loadSavedConfiguration();
+    // Get current real-time configuration (uses current input values)
+    const currentConfig = getCurrentConfiguration();
     
     debugLog('info', 'Session configuration', {
         companyName,
         serviceType,
         aiType,
-        hasSavedConfig: !!savedConfig
+        hasCurrentConfig: !!currentConfig
     });
     
     // Store company name for /alter page
@@ -749,77 +971,49 @@ async function startRecording(aiType) {
             realtimeInputConfig: { automaticActivityDetection: {} } 
         };
 
-        // Configure based on AI type and saved settings
+        // Configure based on AI type and current settings
         if (aiType === 'professional') {
-            const voice = savedConfig?.globalVoice || 'Fenrir';
+            const voice = currentConfig.globalVoice || 'Fenrir';
             config.speechConfig = { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } };
             debugLog('info', `Using professional voice: ${voice}`);
         } else if (aiType === 'natural') {
-            const voice = savedConfig?.globalVoice || 'Leda';
+            const voice = currentConfig.globalVoice || 'Leda';
             config.speechConfig = { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } };
             
-            // Add affective dialog and proactive audio if enabled in saved config
-            if (savedConfig?.globalAffectiveDialog) {
+            // Add affective dialog and proactive audio if enabled in current config
+            if (currentConfig.globalAffectiveDialog) {
                 config.enableAffectiveDialog = true;
-                debugLog('info', 'Enabled affective dialog from saved config');
+                debugLog('info', 'Enabled affective dialog from current config');
             }
-            if (savedConfig?.globalProactiveAudio) {
+            if (currentConfig.globalProactiveAudio) {
                 config.proactivity = { proactiveAudio: true };
-                debugLog('info', 'Enabled proactive audio from saved config');
+                debugLog('info', 'Enabled proactive audio from current config');
             }
             debugLog('info', `Using natural voice: ${voice}`);
         }
 
-        // Apply service-specific configuration with dynamic company name
-        let systemInstruction;
+        // Get current configuration values
+        const savedConfig = loadSavedConfiguration();
+        const currentCompanyName = savedConfig?.companyName || companyName;
+        const currentAgentName = savedConfig?.agentName || 'Sarah';
+        const currentCustomerName = savedConfig?.customerName || '';
         
-        // Handle outbound sales with customer name
-        if (serviceType === 'outbound-sales') {
-            const customerName = customerNameInput.value.trim();
-            if (customerName) {
-                // Create a modified system instruction for outbound sales with customer name
-                const baseInstruction = savedConfig?.services?.[serviceType]?.systemInstruction || 
-                                      serviceConfig.systemInstruction;
-                systemInstruction = baseInstruction.replace(/\[COMPANY_NAME\]/g, companyName) + 
-                                  ` You are speaking with ${customerName}. Address them by name and personalize the conversation.`;
-                debugLog('info', `Using outbound sales with customer name: ${customerName}`);
-            } else {
-                // Use regular outbound sales instruction
-                systemInstruction = (savedConfig?.services?.[serviceType]?.systemInstruction || 
-                                   serviceConfig.systemInstruction).replace(/\[COMPANY_NAME\]/g, companyName);
-            }
-        } else {
-            // Check for custom service-specific instruction first
-            if (savedConfig?.services?.[serviceType]?.systemInstruction) {
-                systemInstruction = savedConfig.services[serviceType].systemInstruction.replace(/\[COMPANY_NAME\]/g, companyName);
-                debugLog('info', 'Using custom service-specific system instructions');
-            } else {
-                systemInstruction = serviceConfig.systemInstruction.replace(/\[COMPANY_NAME\]/g, companyName);
-                debugLog('info', 'Using default service system instructions');
-            }
-        }
+        // Build system instruction with placeholders replaced
+        let systemInstruction = serviceConfig.systemInstruction
+            .replace(/\[COMPANY_NAME\]/g, currentCompanyName)
+            .replace(/\[AGENT_NAME\]/g, currentAgentName)
+            .replace(/\[CUSTOMER_NAME\]/g, currentCustomerName);
         
-        // Prepend global system instruction if available
-        if (savedConfig?.globalSystemInstruction) {
-            systemInstruction = savedConfig.globalSystemInstruction.replace(/\[COMPANY_NAME\]/g, companyName) + '\n\n' + systemInstruction;
-            debugLog('info', 'Prepended global system instructions');
-        }
+        // Use conversation context with placeholders replaced
+        const conversationContext = [{
+            role: 'model',
+            parts: [{ text: serviceConfig.context
+                .replace(/\[COMPANY_NAME\]/g, currentCompanyName)
+                .replace(/\[AGENT_NAME\]/g, currentAgentName)
+                .replace(/\[CUSTOMER_NAME\]/g, currentCustomerName) }]
+        }];
         
-        // Use custom context if available
-        let conversationContext;
-        if (savedConfig?.services?.[serviceType]?.context) {
-            conversationContext = [{
-                role: 'model',
-                parts: [{ text: savedConfig.services[serviceType].context.replace(/\[COMPANY_NAME\]/g, companyName) }]
-            }];
-            debugLog('info', 'Using custom conversation context');
-        } else {
-            conversationContext = [{
-                role: 'model',
-                parts: [{ text: serviceConfig.context.replace(/\[COMPANY_NAME\]/g, companyName) }]
-            }];
-            debugLog('info', 'Using default conversation context');
-        }
+        debugLog('info', 'Using conversation context with current company name');
 
         config.systemInstruction = { parts: [{ text: systemInstruction }] };
         config.context = { turns: conversationContext };
@@ -829,15 +1023,24 @@ async function startRecording(aiType) {
             contextTurns: conversationContext.length
         });
         
-        // Determine model based on AI type and saved config
+        // Determine model based on AI type - use original working logic
         let selectedModel;
-        if (savedConfig?.globalModel === 'premium' || aiType === 'natural') {
-            selectedModel = "gemini-2.5-flash-preview-native-audio-dialog";
-        } else {
+        if (aiType === 'natural') {
+            // Premium AI uses gemini-2.0-flash-live-001 by default (was working)
             selectedModel = "gemini-2.0-flash-live-001";
+        } else {
+            // Standard AI uses gemini-live-2.5-flash-preview by default (was working)  
+            selectedModel = "gemini-live-2.5-flash-preview";
         }
         
-        debugLog('info', `Using model: ${selectedModel}`);
+        // Override with user configuration if available and valid
+        if (currentConfig.premiumModel && aiType === 'natural') {
+            selectedModel = currentConfig.premiumModel;
+        } else if (currentConfig.standardModel && aiType === 'professional') {
+            selectedModel = currentConfig.standardModel;
+        }
+
+        debugLog('info', `Using model for ${aiType}: ${selectedModel}`);
         
         let openPromiseResolve;
         const openPromise = new Promise(resolve => { openPromiseResolve = resolve; });
@@ -1061,6 +1264,43 @@ closeErrorModalButton.addEventListener('click', () => {
 
 debugToggle.addEventListener('click', toggleDebugConsole);
 
+// Configuration Modal Event Listeners
+if (settingsButton) {
+    settingsButton.addEventListener('click', openConfigModal);
+    debugLog('info', 'Settings button event listener added');
+} else {
+    debugLog('error', 'Settings button not found');
+}
+
+if (closeConfigModal) {
+    closeConfigModal.addEventListener('click', closeConfigModalHandler);
+} else {
+    debugLog('error', 'Close config modal button not found');
+}
+
+if (saveConfigButton) {
+    saveConfigButton.addEventListener('click', saveConfiguration);
+} else {
+    debugLog('error', 'Save config button not found');
+}
+
+if (resetConfigButton) {
+    resetConfigButton.addEventListener('click', resetConfiguration);
+} else {
+    debugLog('error', 'Reset config button not found');
+}
+
+// Close modal when clicking outside
+if (configModal) {
+    configModal.addEventListener('click', (e) => {
+        if (e.target === configModal) {
+            closeConfigModalHandler();
+        }
+    });
+} else {
+    debugLog('error', 'Config modal not found');
+}
+
 window.addEventListener('beforeunload', () => {
     debugLog('info', 'Page unloading, stopping recording if active');
     if (isRecording) stopRecording(); 
@@ -1070,4 +1310,6 @@ window.addEventListener('beforeunload', () => {
 document.addEventListener('DOMContentLoaded', () => {
     debugLog('info', 'DOM loaded, initializing app');
     initializeApp();
+    // Load configuration into modal on page load
+    loadConfigurationToModal();
 });
